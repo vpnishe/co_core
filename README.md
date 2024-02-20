@@ -1,1 +1,1 @@
-# co_core
+# polevpn_core

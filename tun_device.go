@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/polevpn/water"
+	"github.com/vpnishe/water"
 )
 
 type TunDevice struct {
