@@ -22,7 +22,7 @@ const (
 const (
 	VERSION_IP_V4                = 4
 	VERSION_IP_V6                = 6
-	TUN_DEVICE_CH_WRITE_SIZE     = 2048
+	TUN_DEVICE_CH_WRITE_SIZE     = 200
 	HEART_BEAT_INTERVAL          = 10
 	RECONNECT_TIMES              = 600000000
 	RECONNECT_INTERVAL           = 5
@@ -58,6 +58,8 @@ type PoleVpnClient struct {
 	pwd               string
 	sni               string
 	skipVerifySSL     bool
+	deviceType        string
+	deviceId          string
 	allocip           string
 	remoteip          string
 	lasttimeHeartbeat time.Time
@@ -116,7 +118,7 @@ func (pc *PoleVpnClient) GetRemoteIP() string {
 	return pc.remoteip
 }
 
-func (pc *PoleVpnClient) Start(endpoint string, user string, pwd string, sni string, skipVerifySSL bool) error {
+func (pc *PoleVpnClient) Start(endpoint string, user string, pwd string, sni string, skipVerifySSL bool, deviceType string, deviceId string) error {
 
 	pc.mutex.Lock()
 	defer pc.mutex.Unlock()
@@ -137,12 +139,15 @@ func (pc *PoleVpnClient) Start(endpoint string, user string, pwd string, sni str
 	pc.pwd = pwd
 	pc.sni = sni
 	pc.skipVerifySSL = skipVerifySSL
+	pc.deviceId = deviceId
+	pc.deviceType = deviceType
 	var err error
 
 	pc.host, err = GetHostByEndpoint(endpoint)
 	if err != nil {
 		if pc.handler != nil {
 			pc.handler(CLIENT_EVENT_ERROR, pc, anyvalue.New().Set("error", "get host fail,"+err.Error()).Set("type", ERROR_UNKNOWN))
+			pc.handler(CLIENT_EVENT_STOPPED, pc, nil)
 		}
 		return err
 	}
@@ -174,7 +179,7 @@ func (pc *PoleVpnClient) Start(endpoint string, user string, pwd string, sni str
 	header := http.Header{}
 	header.Add("Host", pc.host)
 
-	err = pc.conn.Connect(endpoint, user, pwd, "", sni, pc.skipVerifySSL, header)
+	err = pc.conn.Connect(endpoint, user, pwd, "", sni, pc.skipVerifySSL, deviceType, deviceId, header)
 	if err != nil {
 		if err == ErrLoginVerify {
 			if pc.handler != nil {
@@ -324,7 +329,7 @@ func (pc *PoleVpnClient) reconnect() {
 
 		header := http.Header{}
 		header.Add("Host", pc.host)
-		err := pc.conn.Connect(pc.endpoint, pc.user, pc.pwd, pc.allocip, pc.sni, pc.skipVerifySSL, header)
+		err := pc.conn.Connect(pc.endpoint, pc.user, pc.pwd, pc.allocip, pc.sni, pc.skipVerifySSL, pc.deviceType, pc.deviceId, header)
 
 		if pc.state == POLE_CLIENT_CLOSED {
 			break
