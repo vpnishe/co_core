@@ -1,4 +1,4 @@
-module github.com/vpnishe/polevpn_core
+module github.com/vpnishe/co_core
 
 go 1.16
 
