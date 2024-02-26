@@ -55,8 +55,8 @@ func (nm *WindowsNetworkManager) flushDns() error {
 	}
 	return nil
 }
-
-func (nm *WindowsNetworkManager) setInterfaceMetric(device string, mertic string) error {
+//@@Deprecated
+/*func (nm *WindowsNetworkManager) setInterfaceMetric(device string, mertic string) error {
 
 	cmd := "powershell -nologo -noprofile Set-NetIPInterface -InterfaceAlias '" + device + "' -InterfaceMetric " + mertic
 	args := strings.Split(cmd, " ")
@@ -67,7 +67,7 @@ func (nm *WindowsNetworkManager) setInterfaceMetric(device string, mertic string
 		return errors.New(err.Error() + "," + string(out))
 	}
 	return nil
-}
+}*/
 
 func (nm *WindowsNetworkManager) restoreDnsServer() error {
 
@@ -172,8 +172,8 @@ func (nm *WindowsNetworkManager) SetNetwork(device string, ip string, remoteIp s
 	if err != nil {
 		return errors.New("set address fail," + err.Error())
 	}
-
-	err = nm.setInterfaceMetric(localDevice, "20")
+	//@@Deprecated
+	/*err = nm.setInterfaceMetric(localDevice, "20")
 
 	if err != nil {
 		plog.Errorf("set interface %v mertic fail,%v", localDevice, err)
@@ -183,7 +183,7 @@ func (nm *WindowsNetworkManager) SetNetwork(device string, ip string, remoteIp s
 
 	if err != nil {
 		plog.Errorf("set interface %v mertic fail,%v", device, err)
-	}
+	}*/
 
 	err = nm.flushDns()
 
